@@ -16,9 +16,72 @@ const BookCar = () => {
   const [returnAtDiffLocation, setReturnAtDiffLocation] = useState(false);
   const [returnLocation, setReturnLocation] = useState('');
 
+  // Validation state
+  const [errors, setErrors] = useState({
+    pickupDate: '',
+    pickupTime: '',
+    pickupLocation: '',
+    dropOffLocation: ''
+  });
+
+  const validate = () => {
+    const newErrors = {
+      pickupDate: '',
+      pickupTime: '',
+      pickupLocation: '',
+      dropOffLocation: ''
+    };
+
+    let isValid = true;
+
+    if (!pickupDate) {
+      newErrors.pickupDate = 'Pickup Date is required';
+      isValid = false;
+    }
+    if (!pickupTime) {
+      newErrors.pickupTime = 'Pickup Time is required';
+      isValid = false;
+    }
+    if (!pickupLocation) {
+      newErrors.pickupLocation = 'Pickup Location is required';
+      isValid = false;
+    }
+    if (['AIRPORT DROP OFF', 'POINT TO POINT', 'AIRPORT PICK UP'].includes(serviceType) && !dropOffLocation) {
+      newErrors.dropOffLocation = 'Drop Off Location is required for this service type';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (validate()) {
+      // Create an object with the form data
+      const formData = {
+        serviceType,
+        pickupDate,
+        pickupTime,
+        pickupLocation,
+        stops,
+        dropOffLocation,
+        numPassengers,
+        luggageCount,
+        addChildSeat,
+        childSeats,
+        accessible,
+        returnAtDiffLocation,
+        returnLocation
+      };
+      console.log('Form Data:', formData);
+    }
+  };
+
+
   const handleServiceChange = (event) => {
     setServiceType(event.target.value);
-    // Reset fields based on selected service
     if (event.target.value !== 'AIRPORT PICK UP') {
       setReturnAtDiffLocation(false);
       setReturnLocation('');
@@ -75,7 +138,7 @@ const BookCar = () => {
   };
 
   return (
-    <form className="space-y-4 p-4">
+    <form className="space-y-4 p-4" onSubmit={handleSubmit}>
       {/* Dropdown */}
       <div className="mb-4">
         <label htmlFor="service" className="block text-lg font-medium text-gray-700">
@@ -87,7 +150,7 @@ const BookCar = () => {
           onChange={handleServiceChange}
           className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         >
-          <option value="" disabled>-- Please choose an option --</option>
+          <option value="">-- Please choose an option --</option>
           <option value="AIRPORT DROP OFF">AIRPORT DROP OFF</option>
           <option value="AIRPORT PICK UP">AIRPORT PICK UP</option>
           <option value="HOURLY/AS DIRECTED">HOURLY/AS DIRECTED</option>
@@ -106,8 +169,9 @@ const BookCar = () => {
             type="date"
             value={pickupDate}
             onChange={(e) => setPickupDate(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className={`mt-1 block w-full p-2 border ${errors.pickupDate ? 'border-red-500' : 'border-gray-300'} bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
           />
+          {errors.pickupDate && <p className="text-red-600 text-sm">{errors.pickupDate}</p>}
         </div>
         <div className="flex-1">
           <label htmlFor="pickupTime" className="block text-sm font-medium text-gray-700">
@@ -118,8 +182,9 @@ const BookCar = () => {
             type="time"
             value={pickupTime}
             onChange={(e) => setPickupTime(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className={`mt-1 block w-full p-2 border ${errors.pickupTime ? 'border-red-500' : 'border-gray-300'} bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
           />
+          {errors.pickupTime && <p className="text-red-600 text-sm">{errors.pickupTime}</p>}
         </div>
       </div>
 
@@ -133,12 +198,13 @@ const BookCar = () => {
           type="text"
           value={pickupLocation}
           onChange={(e) => setPickupLocation(e.target.value)}
-          className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className={`mt-1 block w-full p-2 border ${errors.pickupLocation ? 'border-red-500' : 'border-gray-300'} bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
         />
+        {errors.pickupLocation && <p className="text-red-600 text-sm">{errors.pickupLocation}</p>}
       </div>
 
       {/* Add Stop */}
-      {(serviceType === 'HOURLY/AS DIRECTED' || serviceType === 'POINT TO POINT' || serviceType ==='AIRPORT DROP OFF' || serviceType === 'AIRPORT PICK UP') && (
+      {(serviceType === 'HOURLY/AS DIRECTED' || serviceType === 'POINT TO POINT' || serviceType === 'AIRPORT DROP OFF' || serviceType === 'AIRPORT PICK UP') && (
         <div>
           <button
             type="button"
@@ -169,7 +235,7 @@ const BookCar = () => {
       )}
 
       {/* Drop Off Location */}
-      {(serviceType === 'AIRPORT DROP OFF' || serviceType === 'POINT TO POINT'  || serviceType === 'AIRPORT PICK UP') && (
+      {(serviceType === 'AIRPORT DROP OFF' || serviceType === 'POINT TO POINT' || serviceType === 'AIRPORT PICK UP') && (
         <div>
           <label htmlFor="dropOffLocation" className="block text-sm font-medium text-gray-700">
             Drop Off Location
@@ -179,42 +245,41 @@ const BookCar = () => {
             type="text"
             value={dropOffLocation}
             onChange={(e) => setDropOffLocation(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className={`mt-1 block w-full p-2 border ${errors.dropOffLocation ? 'border-red-500' : 'border-gray-300'} bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
           />
-         
+          {errors.dropOffLocation && <p className="text-red-600 text-sm">{errors.dropOffLocation}</p>}
         </div>
       )}
 
-
       <div>
-      {serviceType === 'HOURLY/AS DIRECTED' && (
-            <div className="mt-2 flex items-center">
-              <input
-                id="returnAtDiffLocation"
-                type="checkbox"
-                checked={returnAtDiffLocation}
-                onChange={handleReturnAtDiffLocationChange}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-              <label htmlFor="returnAtDiffLocation" className="ml-2 text-sm font-medium text-gray-700">
-                Return at different location
-              </label>
-              {returnAtDiffLocation && (
-                <div className="mt-2">
-                  <label htmlFor="returnLocation" className="block text-sm font-medium text-gray-700">
-                    Return Location
-                  </label>
-                  <input
-                    id="returnLocation"
-                    type="text"
-                    value={returnLocation}
-                    onChange={(e) => setReturnLocation(e.target.value)}
-                    className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-              )}
-            </div>
-          )}
+        {serviceType === 'HOURLY/AS DIRECTED' && (
+          <div className="mt-2 flex items-center">
+            <input
+              id="returnAtDiffLocation"
+              type="checkbox"
+              checked={returnAtDiffLocation}
+              onChange={handleReturnAtDiffLocationChange}
+              className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="returnAtDiffLocation" className="ml-2 text-sm font-medium text-gray-700">
+              Return at different location
+            </label>
+            {returnAtDiffLocation && (
+              <div className="mt-2">
+                <label htmlFor="returnLocation" className="block text-sm font-medium text-gray-700">
+                  Return Location
+                </label>
+                <input
+                  id="returnLocation"
+                  type="text"
+                  value={returnLocation}
+                  onChange={(e) => setReturnLocation(e.target.value)}
+                  className="mt-1 block w-full p-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Number of Passengers */}
@@ -280,7 +345,7 @@ const BookCar = () => {
       </div>
 
       {/* Add Child Seat */}
-      {serviceType === 'AIRPORT DROP OFF' && (
+      {(serviceType === 'AIRPORT DROP OFF' || serviceType === 'AIRPORT PICK UP' || serviceType === 'HOURLY/AS DIRECTED' || serviceType === 'POINT TO POINT') && (
         <div>
           <button
             type="button"
@@ -352,7 +417,7 @@ const BookCar = () => {
         type="submit"
         className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
-        Select Vehicle
+        Submit
       </button>
     </form>
   );

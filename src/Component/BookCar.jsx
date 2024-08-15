@@ -399,18 +399,23 @@ const BookCar = () => {
       )}
 
       {/* Accessible */}
-      <div className="flex items-center mt-2">
-        <input
-          id="accessible"
-          type="checkbox"
-          checked={accessible}
-          onChange={handleAccessibleChange}
-          className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-        />
-        <label htmlFor="accessible" className="ml-2 text-sm font-medium text-gray-700">
-          <FaAccessibleIcon className="inline mr-1" /> Accessible
+      <div className="flex items-center mt-4">
+        <label htmlFor="accessible" className="mr-2 text-sm font-medium text-gray-700">
+          Accessible Vehicle
         </label>
+        <div
+          onClick={handleAccessibleChange}
+          className={`relative inline-block w-14 h-5 cursor-pointer select-none ${accessible ? 'bg-indigo-600' : 'bg-gray-600'
+            } rounded-full`}
+        >
+          <div
+            className={`absolute left-0 top-0 h-5 w-6 bg-white rounded-full shadow-md transition-transform transform ${accessible ? 'translate-x-8' : 'translate-x-0'
+              }`}
+          />
+        </div>
       </div>
+
+
 
       {/* Select Vehicle Button */}
       <button
